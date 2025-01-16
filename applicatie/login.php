@@ -18,32 +18,33 @@ if (isset($_POST['login'])) {
         $errors[] = 'Wachtwoord is vereist.';
     }
 
-    $db = maakVerbinding();
+    if (!empty($username) && !empty($password)) {
+        $db = maakVerbinding();
+        $sql = 'SELECT username, password
+                FROM [pizzeria].[dbo].[User]
+                WHERE username = :username';
+        $query = $db->prepare($sql);
+        $data_array = [
+            ':username' => $username,
+        ];
+        $query->execute($data_array);
+        
+        if ($row = $query->fetch()) {
+            $username = $row['username'];
+            $passwordhash = $row['password'];
 
-    $sql = 'SELECT username, password
-            FROM [pizzeria].[dbo].[User]
-            WHERE username = :username';
-    $query = $db->prepare($sql);
-
-    $data_array = [
-        ':username' => $username,
-    ];
-
-    $query->execute($data_array);
-    
-    if ($row = $query->fetch()) {
-
-        $username = $row['username'];
-        $passwordhash = $row['password'];
-
-        if(password_verify($password, $passwordhash)) {
-            $_SESSION['username'] = $username;
-            header('location: ./../index.php');
-            exit();
-    } else if (!empty($username) && !empty($password)) {
-        $errors[] = 'De combinatie van gebruikersnaam en wachtwoord is niet geldig.';
+            if(password_verify($password, $passwordhash)) {
+                $_SESSION['username'] = $username;
+                header('location: ./../index.php');
+                exit();
+            } else {
+                $errors[] = 'De combinatie van gebruikersnaam en wachtwoord is niet geldig.';
+            }
+        } else {
+            $errors[] = 'De combinatie van gebruikersnaam en wachtwoord is niet geldig.';
+        }
     }
-}
+
     if (count($errors) > 0) {
         $melding = "<div>";
         foreach ($errors as $error) {
