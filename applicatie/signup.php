@@ -16,8 +16,28 @@ if (isset($_SESSION['username'])) {
         $firstName          = trim(strip_tags($_POST['firstName']));
         $lastName          = trim(strip_tags($_POST['lastName']));
         $address          = trim(strip_tags($_POST['address']));
+        $role = 'Client';
+
+        $passwordhash = password_hash($password, PASSWORD_DEFAULT);
         
+
+
+        if (count($errors) > 0) {
+        $signupQuery = 'INSERT INTO [User](username, password, first_name, last_name, address, role)
+                values (:username, :password, :first_name, :last_name, :address, :role)';
+            $query = $db->prepare($signupQuery);
+            $data = $query->execute([
+                'username' => $username,
+                'password' => $passwordhash,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'address' => $address,
+                'role' => $role,
+            ]);
+
         }
+        }
+
 ?>
 
 <!DOCTYPE html>

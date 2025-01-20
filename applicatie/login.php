@@ -88,7 +88,7 @@ if (isset($_POST['login'])) {
                 </div>
                 <?= $melding ?>
                 <input type="submit" value="Inloggen" name="login">
-                <p>Nog geen account bij ons? <a href="registreren.php">Account aanmaken</a>.</p>
+                <p>Nog geen account bij ons? <a href="signup.php">Account aanmaken</a>.</p>
             </form>
         </div>
 
