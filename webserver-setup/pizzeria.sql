@@ -26,11 +26,10 @@ CREATE TABLE [Role](
   [roleName] NVARCHAR(50) NOT NULL UNIQUE
 );
 
--- Create Status table (moet voor Pizza_Order)
-CREATE TABLE [Status](
-  [statusId] INT IDENTITY NOT NULL,
-  [statusName] NVARCHAR(255) NOT NULL,
-  PRIMARY KEY(statusId, statusName)
+-- Create Status table
+CREATE TABLE [Status] (
+  [statusId] INT IDENTITY(1,1) PRIMARY KEY,
+  [statusName] NVARCHAR(255) NOT NULL UNIQUE
 );
 
 -- Create User table
@@ -98,12 +97,12 @@ CREATE TABLE [Pizza_Order_Product] (
   FOREIGN KEY ([productId]) REFERENCES Product([productId])
 );
 
--- Insert statements voor Role tabel (deze ontbrak nog)
+-- Insert statements voor Role tabel
 INSERT INTO [Role] (roleName) VALUES
 ('Klant'),
 ('Medewerker');
 
--- Insert statements voor Status tabel (deze ontbrak nog)
+-- Insert statements voor Status tabel
 INSERT INTO [Status] (statusName) VALUES
 ('In behandeling'),
 ('In bereiding'),
