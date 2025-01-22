@@ -70,9 +70,6 @@ if (isset($_POST['login'])) {
 
     <main>
 
-        <div>
-            <h2>Welkom terug,</h2>
-
             <form method="post">
                 <div>
                     <input type="text" name="username" id="username" placeholder="user123" value="<?php if (isset($username)) {
@@ -90,7 +87,6 @@ if (isset($_POST['login'])) {
                 <input type="submit" value="Inloggen" name="login">
                 <p>Nog geen account bij ons? <a href="signup.php">Account aanmaken</a>.</p>
             </form>
-        </div>
 
 
     </main>
