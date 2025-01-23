@@ -10,7 +10,6 @@ require_once 'db_connectie.php';
 
 $db = maakVerbinding();
 
-// Eerste query voor product informatie
 $query = 'SELECT productId, productName, price, typeName 
           FROM [pizzeria].[dbo].[Product] p 
           INNER JOIN [pizzeria].[dbo].[ProductType] pt ON p.typeId = pt.typeId';
@@ -18,7 +17,6 @@ $query = 'SELECT productId, productName, price, typeName
 $data = $db->query($query);
 $products = [];
 
-// Verzamel eerst alle product informatie
 while($rij = $data->fetch()) {
     $products[$rij['productId']] = [
         'name' => $rij['productName'],
@@ -28,7 +26,6 @@ while($rij = $data->fetch()) {
     ];
 }
 
-// Tweede query voor ingrediënten
 $query_ingredients = 'SELECT productId, ingredientName 
                      FROM [pizzeria].[dbo].[Product_Ingredient] pi 
                      INNER JOIN [pizzeria].[dbo].[Ingredient] i 
@@ -36,14 +33,12 @@ $query_ingredients = 'SELECT productId, ingredientName
 
 $data_ingredients = $db->query($query_ingredients);
 
-// Voeg ingrediënten toe aan de juiste producten
 while($rij = $data_ingredients->fetch()) {
     if(isset($products[$rij['productId']])) {
         $products[$rij['productId']]['ingredients'][] = $rij['ingredientName'];
     }
 }
 
-// Bouw de menu HTML
 $menu = '<div>';
 
 foreach($products as $productId => $product) {
@@ -54,12 +49,16 @@ foreach($products as $productId => $product) {
     }
     
     $menu .= "
-        <h2>{$product['name']}</h2>
-        <h3>€{$product['price']}</h3>
-        <p>{$product['category']}</p>
-        {$ingredients_part}
-        <input type='number' id='quantity-{$productId}' value='1' min='1' style='width: 50px;'>
-        <button onclick='addToCart({$productId})' data-product-id='{$productId}'>Toevoegen</button>
+        <form action='update_winkelwagen.php' method='POST'>
+            <h2>{$product['name']}</h2>
+            <h3>€{$product['price']}</h3>
+            <p>{$product['category']}</p>
+            {$ingredients_part}
+            <input type='number' name='quantity' value='1' min='1' style='width: 50px;'>
+            <input type='hidden' name='productId' value='{$productId}'>
+            <input type='hidden' name='action' value='update'>
+            <button type='submit'>Toevoegen</button>
+        </form>
     ";
 }
 
@@ -69,6 +68,7 @@ $menu .= "</div>";
 
 <html>
     <body>
+        <a href="winkelwagen.php">Naar winkelwagen</a>
         <?= $menu ?>
     </body>
 </html>

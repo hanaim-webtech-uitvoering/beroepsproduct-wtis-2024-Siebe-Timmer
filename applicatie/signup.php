@@ -1,11 +1,17 @@
-<?php //TODO: emailadres opslaan uit session en het is niet meer mogelijk om het te wijzigen
-session_start();
-if (isset($_SESSION['username'])) {
-    header('Location: index.php');
-}
+<?php
+
+    session_start();
+    
+    require_once 'functions/checkUserRole.php';
+
     require_once 'db_connectie.php';
 
     $db = maakVerbinding();
+
+    if (isset($_SESSION['username']) && !checkIsEmployee()) {
+        header('Location: index.php');
+        exit();
+    }
 
 
     if (isset($_POST['sign-up'])) {
@@ -16,15 +22,57 @@ if (isset($_SESSION['username'])) {
         $firstName          = trim(strip_tags($_POST['firstName']));
         $lastName          = trim(strip_tags($_POST['lastName']));
         $address          = trim(strip_tags($_POST['address']));
-        $role = 'Client';
 
-        $passwordhash = password_hash($password, PASSWORD_DEFAULT);
+        // Validatie voor verplichte velden
+        if (empty($username)) {
+            $errors[] = "Gebruikersnaam is verplicht";
+        } else {
+            // Check of gebruikersnaam al bestaat
+            $checkUsername = "SELECT COUNT(*) FROM [User] WHERE username = :username";
+            $query = $db->prepare($checkUsername);
+            $query->execute(['username' => $username]);
+            if ($query->fetchColumn() > 0) {
+                $errors[] = "Deze gebruikersnaam bestaat al";
+            }
+        }
+
+        if (strlen($username) > 255) {
+            $errors[] = "Gebruikersnaam mag niet langer zijn dan 255 karakters";
+        }
         
+        if (empty($password)) {
+            $errors[] = "Wachtwoord is verplicht";
+        }
 
+        if (empty($firstName)) {
+            $errors[] = "Voornaam is verplicht";
+        } elseif (strlen($firstName) > 255) {
+            $errors[] = "Voornaam mag niet langer zijn dan 255 karakters";
+        }
 
-        if (count($errors) > 0) {
-        $signupQuery = 'INSERT INTO [User](username, password, first_name, last_name, address, role)
-                values (:username, :password, :first_name, :last_name, :address, :role)';
+        if (empty($lastName)) {
+            $errors[] = "Achternaam is verplicht";
+        } elseif (strlen($lastName) > 255) {
+            $errors[] = "Achternaam mag niet langer zijn dan 255 karakters";
+        }
+
+        if (!empty($address) && strlen($address) > 255) {
+            $errors[] = "Adres mag niet langer zijn dan 255 karakters";
+        }
+
+        if (!empty($errors)) {  // Change from count($errors) > 0
+            $message = "<div>";
+            foreach ($errors as $error) {
+                $message .= "<li>$error</li>";
+            }
+            $message .= "</div>";
+        } else {
+            // Your existing account creation code
+            $passwordhash = password_hash($password, PASSWORD_DEFAULT);
+            $role = checkIsEmployee() ? 1 : 0;
+        
+            $signupQuery = 'INSERT INTO [User](username, password, first_name, last_name, address, role)
+                    values (:username, :password, :first_name, :last_name, :address, :isEmployee)';
             $query = $db->prepare($signupQuery);
             $data = $query->execute([
                 'username' => $username,
@@ -32,11 +80,14 @@ if (isset($_SESSION['username'])) {
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'address' => $address,
-                'role' => $role,
+                'isEmployee' => $role,
             ]);
-
+            $message = "Account succesvol aangemaakt!";
         }
-        }
+    }
+            
+        
+    
 
 ?>
 
@@ -56,30 +107,33 @@ if (isset($_SESSION['username'])) {
             
             <div class="form-group">
                 <label for="username">Gebruikersnaam:</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" value="<?php echo isset($username) ? htmlspecialchars($username) : ''; ?>">
             </div>
 
             <div class="form-group">
                 <label for="password">Wachtwoord:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password">
             </div>
 
             <div class="form-group">
                 <label for="firstName">Voornaam:</label>
-                <input type="text" id="firstName" name="firstName" required>
+                <input type="text" id="firstName" name="firstName" value="<?php echo isset($firstName) ? htmlspecialchars($firstName) : ''; ?>">
             </div>
 
             <div class="form-group">
                 <label for="lastName">Achternaam:</label>
-                <input type="text" id="lastName" name="lastName" required>
+                <input type="text" id="lastName" name="lastName" value="<?php echo isset($lastName) ? htmlspecialchars($lastName) : ''; ?>">
             </div>
 
             <div class="form-group">
                 <label for="address">Adres:</label>
-                <input type="text" id="address" name="address" required>
+                <input type="text" id="address" name="address" value="<?php echo isset($address) ? htmlspecialchars($address) : ''; ?>">
             </div>
 
             <button type="submit" name="sign-up">Registreren</button>
+            
+            <?php if(isset($message)){ echo $message; } ?>
+             
             
             <p>Heb je al een account? <a href="login.php">Log hier in</a></p>
         </form>

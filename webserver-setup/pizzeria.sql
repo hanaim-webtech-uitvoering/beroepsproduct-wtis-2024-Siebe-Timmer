@@ -19,13 +19,6 @@ IF OBJECT_ID('Pizza_Order_Product', 'U') IS NOT NULL
 IF OBJECT_ID('Pizza_Order', 'U') IS NOT NULL
     DROP TABLE Pizza_Order;
 
-
--- Create Role table (moet voor User)
-CREATE TABLE [Role](
-  [roleId] INT IDENTITY(1,1) PRIMARY KEY,
-  [roleName] NVARCHAR(50) NOT NULL UNIQUE
-);
-
 -- Create Status table
 CREATE TABLE [Status] (
   [statusId] INT IDENTITY(1,1) PRIMARY KEY,
@@ -40,8 +33,7 @@ CREATE TABLE [User] (
   [firstName] NVARCHAR(255) NOT NULL,
   [lastName] NVARCHAR(255) NOT NULL,
   [address] NVARCHAR(255),
-  [roleId] INT NOT NULL,
-  FOREIGN KEY ([roleId]) REFERENCES [Role]([roleId])
+  [isEmployee] BIT NOT NULL DEFAULT 0
 );
 
 -- Create ProductType table
@@ -77,13 +69,13 @@ CREATE TABLE [Product_Ingredient] (
 -- Create Pizza_Order table
 CREATE TABLE [Pizza_Order] (
   [orderId] INT IDENTITY(1,1) PRIMARY KEY,
-  [userId] INT,
-  [personnelId] INT NOT NULL,
+  [clientId] INT,
+  [employeeId] INT NOT NULL,
   [orderDateTime] DATETIME NOT NULL,
   [statusId] INT NOT NULL,
   [deliveryAddress] NVARCHAR(255) NOT NULL,
-  FOREIGN KEY ([userId]) REFERENCES [User]([userId]),
-  FOREIGN KEY ([personnelId]) REFERENCES [User]([userId]),
+  FOREIGN KEY ([clientId]) REFERENCES [User]([userId]),
+  FOREIGN KEY ([employeeId]) REFERENCES [User]([userId]),
   FOREIGN KEY ([statusId]) REFERENCES [Status]([statusId])
 );
 
@@ -97,11 +89,6 @@ CREATE TABLE [Pizza_Order_Product] (
   FOREIGN KEY ([productId]) REFERENCES Product([productId])
 );
 
--- Insert statements voor Role tabel
-INSERT INTO [Role] (roleName) VALUES
-('Klant'),
-('Medewerker');
-
 -- Insert statements voor Status tabel
 INSERT INTO [Status] (statusName) VALUES
 ('In behandeling'),
@@ -110,46 +97,46 @@ INSERT INTO [Status] (statusName) VALUES
 ('Afgeleverd');
 
 -- Insert statements voor users
-INSERT INTO [User] (username, [password], firstName, lastName, address, roleId) VALUES
-('jdoe', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'John', 'Doe', 'Bakkerstraat 1, 6811EG, Arnhem', 1),
-('mvermeer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Maria', 'Vermeer', 'Jansplein 2, 6811GD, Arnhem', 1),
-('rdeboer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rik', 'de Boer', 'Waalkade 22, 6511XR, Nijmegen', 2),
-('sbakker', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Sophie', 'Bakker', 'Sint Annastraat 7, 6524EZ, Nijmegen', 2),
-('fholwerda', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Fenna', 'Holwerda', 'Velperweg 11, 6814AD, Arnhem', 1),
-('kdijkstra', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Klaas', 'Dijkstra', 'Kerkstraat 4, 6811DW, Arnhem', 1),
-('lheineken', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lucas', 'Heineken', 'Willemsplein 3, 6811KD, Arnhem', 2),
-('mvandam', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mila', 'van Dam', 'Oranjesingel 8, 6511NV, Nijmegen', 2),
-('gkoolstra', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Gert', 'Koolstra', 'Ziekerstraat 25, 6511LH, Nijmegen', 1),
-('evisscher', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Emma', 'Visscher', 'Geitenkamp 12, 6815AP, Arnhem', 1),
-('tjanssen', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tom', 'Janssen', 'Marialaan 16, 6541RP, Nijmegen', 2),
-('abrouwer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Anna', 'Brouwer', 'Smetiusstraat 17, 6511EP, Nijmegen', 2),
-('wbos', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Willem', 'Bos', 'Sint Annastraat 7, 6524EZ, Nijmegen', 1),
-('tvandermeer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tessa', 'van der Meer', 'Oranjesingel 8, 6511NV, Nijmegen', 1),
-('rkramer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rob', 'Kramer', 'Van Welderenstraat 9, 6511MS, Nijmegen', 2),
-('mnijland', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Maud', 'Nijland', 'Apeldoornsestraat 15, 6828AJ, Arnhem', 2),
-('dschouten', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'David', 'Schouten', 'Velperweg 11, 6814AD, Arnhem', 1),
-('hdeleeuw', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Hanna', 'de Leeuw', 'Velperweg 11, 6814AD, Arnhem', 1),
-('pvanveen', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Peter', 'van Veen', 'Smetiusstraat 17, 6511EP, Nijmegen', 2),
-('adekhane', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Ahmed', 'Dekhane', 'IJssellaan 13, 6821DJ, Arnhem', 1),
-('mbouaziz', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mouna', 'Bouaziz', 'Bakkerstraat 1, 6811EG, Arnhem', 1),
-('tbayrak', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tarik', 'Bayrak', 'Broekstraat 14, 6822GD, Arnhem', 2),
-('ayildiz', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Aylin', 'Yildiz', 'IJssellaan 13, 6821DJ, Arnhem', 2),
-('rnarsingh', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rajesh', 'Narsingh', 'Bakkerstraat 1, 6811EG, Arnhem', 1),
-('sdurga', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Shanti', 'Durga', 'Bakkerstraat 1, 6811EG, Arnhem', 1),
-('mkassem', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mohammed', 'Kassem', 'Apeldoornsestraat 15, 6828AJ, Arnhem', 2),
-('lsaleh', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lina', 'Saleh', 'Marialaan 16, 6541RP, Nijmegen', 1),
-('aghebre', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Amanuel', 'Ghebre', 'Velperweg 11, 6814AD, Arnhem', 1),
-('mtsega', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Miriam', 'Tsega', 'Bakkerstraat 1, 6811EG, Arnhem', 1),
-('pkowalski', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Piotr', 'Kowalski', 'Smetiusstraat 17, 6511EP, Nijmegen', 2),
-('aivanov', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Alexei', 'Ivanov', 'Van Oldenbarneveltstraat 18, 6511PA, Nijmegen', 2),
-('mkarimi', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mina', 'Karimi', 'Hertogstraat 19, 6511RV, Nijmegen', 1),
-('hradman', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Hassan', 'Radman', 'Bakkerstraat 1, 6811EG, Arnhem', 1),
-('lbaloyi', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lerato', 'Baloyi', 'Waalkade 22, 6511XR, Nijmegen', 2),
-('dpetrov', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Dmitri', 'Petrov', 'Van Schaeck Mathonsingel 20, 6512AP, Nijmegen', 2),
-('ibrahimovic', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Ismail', 'Brahimovic', 'Lange Hezelstraat 21, 6511CM, Nijmegen', 1),
-('snovak', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Sanja', 'Novak', 'Smetiusstraat 17, 6511EP, Nijmegen', 1),
-('yabebe', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Yonas', 'Abebe', 'Van Welderenstraat 9, 6511MS, Nijmegen', 2),
-('ngebre', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Nardos', 'Gebre', 'Van Welderenstraat 9, 6511MS, Nijmegen', 2);
+INSERT INTO [User] (username, [password], firstName, lastName, address, isEmployee) VALUES
+('jdoe', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'John', 'Doe', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
+('mvermeer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Maria', 'Vermeer', 'Jansplein 2, 6811GD, Arnhem', 0),
+('rdeboer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rik', 'de Boer', 'Waalkade 22, 6511XR, Nijmegen', 1),
+('sbakker', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Sophie', 'Bakker', 'Sint Annastraat 7, 6524EZ, Nijmegen', 1),
+('fholwerda', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Fenna', 'Holwerda', 'Velperweg 11, 6814AD, Arnhem', 0),
+('kdijkstra', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Klaas', 'Dijkstra', 'Kerkstraat 4, 6811DW, Arnhem', 0),
+('lheineken', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lucas', 'Heineken', 'Willemsplein 3, 6811KD, Arnhem', 1),
+('mvandam', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mila', 'van Dam', 'Oranjesingel 8, 6511NV, Nijmegen', 1),
+('gkoolstra', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Gert', 'Koolstra', 'Ziekerstraat 25, 6511LH, Nijmegen', 0),
+('evisscher', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Emma', 'Visscher', 'Geitenkamp 12, 6815AP, Arnhem', 0),
+('tjanssen', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tom', 'Janssen', 'Marialaan 16, 6541RP, Nijmegen', 1),
+('abrouwer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Anna', 'Brouwer', 'Smetiusstraat 17, 6511EP, Nijmegen', 1),
+('wbos', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Willem', 'Bos', 'Sint Annastraat 7, 6524EZ, Nijmegen', 0),
+('tvandermeer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tessa', 'van der Meer', 'Oranjesingel 8, 6511NV, Nijmegen', 0),
+('rkramer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rob', 'Kramer', 'Van Welderenstraat 9, 6511MS, Nijmegen', 1),
+('mnijland', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Maud', 'Nijland', 'Apeldoornsestraat 15, 6828AJ, Arnhem', 1),
+('dschouten', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'David', 'Schouten', 'Velperweg 11, 6814AD, Arnhem', 0),
+('hdeleeuw', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Hanna', 'de Leeuw', 'Velperweg 11, 6814AD, Arnhem', 0),
+('pvanveen', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Peter', 'van Veen', 'Smetiusstraat 17, 6511EP, Nijmegen', 1),
+('adekhane', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Ahmed', 'Dekhane', 'IJssellaan 13, 6821DJ, Arnhem', 0),
+('mbouaziz', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mouna', 'Bouaziz', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
+('tbayrak', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tarik', 'Bayrak', 'Broekstraat 14, 6822GD, Arnhem', 1),
+('ayildiz', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Aylin', 'Yildiz', 'IJssellaan 13, 6821DJ, Arnhem', 1),
+('rnarsingh', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rajesh', 'Narsingh', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
+('sdurga', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Shanti', 'Durga', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
+('mkassem', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mohammed', 'Kassem', 'Apeldoornsestraat 15, 6828AJ, Arnhem', 1),
+('lsaleh', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lina', 'Saleh', 'Marialaan 16, 6541RP, Nijmegen', 0),
+('aghebre', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Amanuel', 'Ghebre', 'Velperweg 11, 6814AD, Arnhem', 0),
+('mtsega', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Miriam', 'Tsega', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
+('pkowalski', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Piotr', 'Kowalski', 'Smetiusstraat 17, 6511EP, Nijmegen', 1),
+('aivanov', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Alexei', 'Ivanov', 'Van Oldenbarneveltstraat 18, 6511PA, Nijmegen', 1),
+('mkarimi', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mina', 'Karimi', 'Hertogstraat 19, 6511RV, Nijmegen', 0),
+('hradman', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Hassan', 'Radman', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
+('lbaloyi', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lerato', 'Baloyi', 'Waalkade 22, 6511XR, Nijmegen', 1),
+('dpetrov', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Dmitri', 'Petrov', 'Van Schaeck Mathonsingel 20, 6512AP, Nijmegen', 1),
+('ibrahimovic', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Ismail', 'Brahimovic', 'Lange Hezelstraat 21, 6511CM, Nijmegen', 0),
+('snovak', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Sanja', 'Novak', 'Smetiusstraat 17, 6511EP, Nijmegen', 0),
+('yabebe', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Yonas', 'Abebe', 'Van Welderenstraat 9, 6511MS, Nijmegen', 1),
+('ngebre', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Nardos', 'Gebre', 'Van Welderenstraat 9, 6511MS, Nijmegen', 1);
 
 -- Insert statements voor product types
 INSERT INTO ProductType (typeName) VALUES
@@ -209,7 +196,7 @@ INSERT INTO Product_Ingredient (productId, ingredientId) VALUES
 (5, 8); -- Combinatiemaaltijd met Saus
 
 -- Insert statements voor pizza orders
-INSERT INTO [Pizza_Order] (userId, personnelId, orderDateTime, statusId, deliveryAddress) VALUES
+INSERT INTO [Pizza_Order] (clientId, employeeId, orderDateTime, statusId, deliveryAddress) VALUES
 (1, 3, '2024-06-12 18:45:00', 1, 'Bakkerstraat 1, 6811EG, Arnhem'),
 (2, 4, '2024-06-12 19:00:00', 2, 'Jansplein 2, 6811GD, Arnhem'),
 (3, 5, '2024-06-12 19:15:00', 1, 'Willemsplein 3, 6811KD, Arnhem'),

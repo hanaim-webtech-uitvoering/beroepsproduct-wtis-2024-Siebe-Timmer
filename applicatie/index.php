@@ -37,6 +37,7 @@ $html_table = $html_table . "</table>";
     <title>Index</title>
 </head>
 <body>
+    <?= require_once 'navbar.php' ?>
     <h1>It Works!</h1>
     <br>
     <?php echo $html_table ?>
