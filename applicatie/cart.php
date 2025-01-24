@@ -9,15 +9,13 @@ require_once 'db_connectie.php';
 
 $db = maakVerbinding();
 
-// Controleer of de winkelwagen bestaat in de sessie
-if (!isset($_SESSION['winkelwagen'])) {
-    $_SESSION['winkelwagen'] = [];
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
 }
 
-// Haal product informatie op voor items in de winkelwagen
 $winkelwagen_items = [];
-if (!empty($_SESSION['winkelwagen'])) {
-    $product_ids = array_keys($_SESSION['winkelwagen']);
+if (!empty($_SESSION['cart'])) {
+    $product_ids = array_keys($_SESSION['cart']);
     $placeholders = str_repeat('?,', count($product_ids) - 1) . '?';
     
     $query = "SELECT productId, productName, price 
@@ -28,7 +26,7 @@ if (!empty($_SESSION['winkelwagen'])) {
     $stmt->execute($product_ids);
     
     while ($row = $stmt->fetch()) {
-        $quantity = $_SESSION['winkelwagen'][$row['productId']];
+        $quantity = $_SESSION['cart'][$row['productId']];
         $winkelwagen_items[] = [
             'id' => $row['productId'],
             'name' => $row['productName'],
@@ -39,10 +37,9 @@ if (!empty($_SESSION['winkelwagen'])) {
     }
 }
 
-// Bereken totaal
-$totaal = 0;
+$total = 0;
 foreach ($winkelwagen_items as $item) {
-    $totaal += $item['subtotal'];
+    $total += $item['subtotal'];
 }
 ?>
 
@@ -57,8 +54,8 @@ foreach ($winkelwagen_items as $item) {
     <?php if (empty($winkelwagen_items)): ?>
         <p>Je winkelwagen is leeg</p>
     <?php else: ?>
-        <form method="POST" action="update_winkelwagen.php">
-            <table border="1">
+        <form method="POST" action="functions/update_cart.php">
+            <table>
                 <tr>
                     <th>Product</th>
                     <th>Prijs per stuk</th>
@@ -78,19 +75,19 @@ foreach ($winkelwagen_items as $item) {
                         </td>
                         <td>€<?= number_format($item['subtotal'], 2) ?></td>
                         <td>
-                            <a href="update_winkelwagen.php?action=remove&productId=<?= $item['id'] ?>">Verwijderen</a>
+                            <a href="functions/update_cart.php?action=remove&productId=<?= $item['id'] ?>">Verwijderen</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
                 <tr>
                     <td colspan="3"><strong>Totaal</strong></td>
-                    <td colspan="2"><strong>€<?= number_format($totaal, 2) ?></strong></td>
+                    <td colspan="2"><strong>€<?= number_format($total, 2) ?></strong></td>
                 </tr>
             </table>
             
             <input type="hidden" name="action" value="update_all">
             <input type="submit" value="Winkelwagen bijwerken">
-            <a href="bestelling_afronden.php"><button type="button">Bestelling afronden</button></a>
+            <a href="checkout.php"><button type="button">Bestelling afronden</button></a>
         </form>
     <?php endif; ?>
     

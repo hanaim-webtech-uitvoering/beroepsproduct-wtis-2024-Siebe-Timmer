@@ -1,7 +1,5 @@
 <?php
 
-session_start();
-
 if(!$_SESSION['username']){
   header('Location: login.php');
 }
@@ -49,7 +47,7 @@ foreach($products as $productId => $product) {
     }
     
     $menu .= "
-        <form action='update_winkelwagen.php' method='POST'>
+        <form action='functions/updateCart.php' method='POST'>
             <h2>{$product['name']}</h2>
             <h3>€{$product['price']}</h3>
             <p>{$product['category']}</p>
@@ -64,11 +62,7 @@ foreach($products as $productId => $product) {
 
 $menu .= "</div>";
 
+return $menu;
+
 ?>
 
-<html>
-    <body>
-        <a href="winkelwagen.php">Naar winkelwagen</a>
-        <?= $menu ?>
-    </body>
-</html>

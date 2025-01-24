@@ -6,26 +6,6 @@ if(!$_SESSION['username']){
   header('Location: login.php');
 }
 
-require_once 'db_connectie.php';
-
-$db = maakVerbinding();
-
-$query = 'select username
-          from [pizzeria].[dbo].[User]';
-
-$data = $db->query($query);
-
-$html_table = '<table>';
-$html_table = $html_table . '<tr><th>Naam</th></tr>';
-
-while($rij = $data->fetch()) {
-  $username = $rij['username'];
-
-  $html_table = $html_table . "<tr><td>$username</td></tr>";
-}
-
-$html_table = $html_table . "</table>";
-
 ?>
 
 <!DOCTYPE html>
@@ -38,13 +18,6 @@ $html_table = $html_table . "</table>";
 </head>
 <body>
     <?= require_once 'navbar.php' ?>
-    <h1>It Works!</h1>
-    <br>
-    <?php echo $html_table ?>
-    <br>
-    Alle technische informatie over je webserver vind je hier: <a href="phpinfo.php">http://<?=$_SERVER['HTTP_HOST']?>/phpinfo.php</a>
-    <br>
-    <br>
-    Een voorbeeld van een pagina die gegevens uit de database haalt vind je hier: <a href="componist-aantalstukken.php">http://<?=$_SERVER['HTTP_HOST']?>/componist-aantalstukken.php</a>
+    <?= require_once 'menu.php' ?>
 </body>
 </html>
