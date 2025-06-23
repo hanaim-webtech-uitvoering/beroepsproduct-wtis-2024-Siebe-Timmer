@@ -1,3 +1,4 @@
+
 IF OBJECT_ID('User', 'U') IS NOT NULL
     DROP TABLE [User];
 
@@ -19,135 +20,120 @@ IF OBJECT_ID('Pizza_Order_Product', 'U') IS NOT NULL
 IF OBJECT_ID('Pizza_Order', 'U') IS NOT NULL
     DROP TABLE Pizza_Order;
 
--- Create Status table
-CREATE TABLE [Status] (
-  [statusId] INT IDENTITY(1,1) PRIMARY KEY,
-  [statusName] NVARCHAR(255) NOT NULL UNIQUE
-);
 
 -- Create User table
 CREATE TABLE [User] (
-  [userId] INT IDENTITY PRIMARY KEY,
-  [username] NVARCHAR(255) NOT NULL UNIQUE,
+  [username] NVARCHAR(255) PRIMARY KEY,
   [password] NVARCHAR(255) NOT NULL,
-  [firstName] NVARCHAR(255) NOT NULL,
-  [lastName] NVARCHAR(255) NOT NULL,
+  [first_name] NVARCHAR(255) NOT NULL,
+  [last_name] NVARCHAR(255) NOT NULL,
   [address] NVARCHAR(255),
-  [isEmployee] BIT NOT NULL DEFAULT 0
+  [role] NVARCHAR(50) NOT NULL
 );
 
 -- Create ProductType table
 CREATE TABLE [ProductType] (
-  [typeId] INT IDENTITY(1,1) PRIMARY KEY,
-  [typeName] NVARCHAR(255) NOT NULL UNIQUE
+  [name] NVARCHAR(255) PRIMARY KEY
 );
 
 -- Create Ingredient table
 CREATE TABLE [Ingredient] (
-  [ingredientId] INT IDENTITY(1,1) PRIMARY KEY,
-  [ingredientName] NVARCHAR(255) NOT NULL UNIQUE
+  [name] NVARCHAR(255) PRIMARY KEY
 );
 
 -- Create Product table
 CREATE TABLE [Product] (
-  [productId] INT IDENTITY(1,1) PRIMARY KEY,
-  [productName] NVARCHAR(255) NOT NULL UNIQUE,
+  [name] NVARCHAR(255) PRIMARY KEY,
   [price] DECIMAL(10,2) NOT NULL,
-  [typeId] INT NOT NULL,
-  FOREIGN KEY ([typeId]) REFERENCES ProductType([typeId])
+  [type_id] NVARCHAR(255) NOT NULL
 );
 
 -- Create Product_Ingredient table
 CREATE TABLE [Product_Ingredient] (
-  [productId] INT NOT NULL,
-  [ingredientId] INT NOT NULL,
-  PRIMARY KEY ([productId], [ingredientId]),
-  FOREIGN KEY ([productId]) REFERENCES Product([productId]),
-  FOREIGN KEY ([ingredientId]) REFERENCES Ingredient([ingredientId])
+  [product_name] NVARCHAR(255),
+  [ingredient_name] NVARCHAR(255),
+  PRIMARY KEY ([product_name], [ingredient_name])
 );
 
--- Create Pizza_Order table
 CREATE TABLE [Pizza_Order] (
-  [orderId] INT IDENTITY(1,1) PRIMARY KEY,
-  [clientId] INT,
-  [employeeId] INT NOT NULL,
-  [orderDateTime] DATETIME NOT NULL,
-  [statusId] INT NOT NULL,
-  [deliveryAddress] NVARCHAR(255) NOT NULL,
-  FOREIGN KEY ([clientId]) REFERENCES [User]([userId]),
-  FOREIGN KEY ([employeeId]) REFERENCES [User]([userId]),
-  FOREIGN KEY ([statusId]) REFERENCES [Status]([statusId])
-);
+  [order_id] INT PRIMARY KEY IDENTITY(1, 1),
+  [client_username] NVARCHAR(255),
+  [client_name] NVARCHAR(255) NOT NULL,
+  [personnel_username] NVARCHAR(255) NOT NULL,
+  [datetime] DATETIME NOT NULL,
+  [status] INT,
+  [address] NVARCHAR(255)
+)
 
 -- Create Pizza_Order_Product table
 CREATE TABLE [Pizza_Order_Product] (
-  [orderId] INT NOT NULL,
-  [productId] INT NOT NULL,
+  [order_id] INT,
+  [product_name] NVARCHAR(255),
   [quantity] INT NOT NULL,
-  PRIMARY KEY ([orderId], [productId]),
-  FOREIGN KEY ([orderId]) REFERENCES Pizza_Order([orderId]),
-  FOREIGN KEY ([productId]) REFERENCES Product([productId])
+  PRIMARY KEY ([order_id], [product_name])
 );
 
--- Insert statements voor Status tabel
-INSERT INTO [Status] (statusName) VALUES
-('In behandeling'),
-('In bereiding'),
-('Onderweg'),
-('Afgeleverd');
+-- -- Add foreign key constraints
+ALTER TABLE [Product] ADD FOREIGN KEY ([type_id]) REFERENCES [ProductType] ([name]);
+ALTER TABLE [Product_Ingredient] ADD FOREIGN KEY ([product_name]) REFERENCES [Product] ([name]);
+ALTER TABLE [Product_Ingredient] ADD FOREIGN KEY ([ingredient_name]) REFERENCES [Ingredient] ([name]);
+ALTER TABLE [Pizza_Order] ADD FOREIGN KEY ([client_username]) REFERENCES [User] ([username]);
+ALTER TABLE [Pizza_Order] ADD FOREIGN KEY ([personnel_username]) REFERENCES [User] ([username]);
+ALTER TABLE [Pizza_Order_Product] ADD FOREIGN KEY ([order_id]) REFERENCES [Pizza_Order] ([order_id]);
+ALTER TABLE [Pizza_Order_Product] ADD FOREIGN KEY ([product_name]) REFERENCES [Product] ([name]);
 
--- Insert statements voor users
-INSERT INTO [User] (username, [password], firstName, lastName, address, isEmployee) VALUES
-('jdoe', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'John', 'Doe', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
-('mvermeer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Maria', 'Vermeer', 'Jansplein 2, 6811GD, Arnhem', 0),
-('rdeboer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rik', 'de Boer', 'Waalkade 22, 6511XR, Nijmegen', 1),
-('sbakker', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Sophie', 'Bakker', 'Sint Annastraat 7, 6524EZ, Nijmegen', 1),
-('fholwerda', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Fenna', 'Holwerda', 'Velperweg 11, 6814AD, Arnhem', 0),
-('kdijkstra', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Klaas', 'Dijkstra', 'Kerkstraat 4, 6811DW, Arnhem', 0),
-('lheineken', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lucas', 'Heineken', 'Willemsplein 3, 6811KD, Arnhem', 1),
-('mvandam', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mila', 'van Dam', 'Oranjesingel 8, 6511NV, Nijmegen', 1),
-('gkoolstra', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Gert', 'Koolstra', 'Ziekerstraat 25, 6511LH, Nijmegen', 0),
-('evisscher', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Emma', 'Visscher', 'Geitenkamp 12, 6815AP, Arnhem', 0),
-('tjanssen', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tom', 'Janssen', 'Marialaan 16, 6541RP, Nijmegen', 1),
-('abrouwer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Anna', 'Brouwer', 'Smetiusstraat 17, 6511EP, Nijmegen', 1),
-('wbos', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Willem', 'Bos', 'Sint Annastraat 7, 6524EZ, Nijmegen', 0),
-('tvandermeer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tessa', 'van der Meer', 'Oranjesingel 8, 6511NV, Nijmegen', 0),
-('rkramer', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rob', 'Kramer', 'Van Welderenstraat 9, 6511MS, Nijmegen', 1),
-('mnijland', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Maud', 'Nijland', 'Apeldoornsestraat 15, 6828AJ, Arnhem', 1),
-('dschouten', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'David', 'Schouten', 'Velperweg 11, 6814AD, Arnhem', 0),
-('hdeleeuw', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Hanna', 'de Leeuw', 'Velperweg 11, 6814AD, Arnhem', 0),
-('pvanveen', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Peter', 'van Veen', 'Smetiusstraat 17, 6511EP, Nijmegen', 1),
-('adekhane', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Ahmed', 'Dekhane', 'IJssellaan 13, 6821DJ, Arnhem', 0),
-('mbouaziz', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mouna', 'Bouaziz', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
-('tbayrak', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Tarik', 'Bayrak', 'Broekstraat 14, 6822GD, Arnhem', 1),
-('ayildiz', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Aylin', 'Yildiz', 'IJssellaan 13, 6821DJ, Arnhem', 1),
-('rnarsingh', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Rajesh', 'Narsingh', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
-('sdurga', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Shanti', 'Durga', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
-('mkassem', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mohammed', 'Kassem', 'Apeldoornsestraat 15, 6828AJ, Arnhem', 1),
-('lsaleh', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lina', 'Saleh', 'Marialaan 16, 6541RP, Nijmegen', 0),
-('aghebre', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Amanuel', 'Ghebre', 'Velperweg 11, 6814AD, Arnhem', 0),
-('mtsega', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Miriam', 'Tsega', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
-('pkowalski', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Piotr', 'Kowalski', 'Smetiusstraat 17, 6511EP, Nijmegen', 1),
-('aivanov', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Alexei', 'Ivanov', 'Van Oldenbarneveltstraat 18, 6511PA, Nijmegen', 1),
-('mkarimi', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Mina', 'Karimi', 'Hertogstraat 19, 6511RV, Nijmegen', 0),
-('hradman', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Hassan', 'Radman', 'Bakkerstraat 1, 6811EG, Arnhem', 0),
-('lbaloyi', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Lerato', 'Baloyi', 'Waalkade 22, 6511XR, Nijmegen', 1),
-('dpetrov', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Dmitri', 'Petrov', 'Van Schaeck Mathonsingel 20, 6512AP, Nijmegen', 1),
-('ibrahimovic', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Ismail', 'Brahimovic', 'Lange Hezelstraat 21, 6511CM, Nijmegen', 0),
-('snovak', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Sanja', 'Novak', 'Smetiusstraat 17, 6511EP, Nijmegen', 0),
-('yabebe', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Yonas', 'Abebe', 'Van Welderenstraat 9, 6511MS, Nijmegen', 1),
-('ngebre', '$2y$10$UfMd.QnzDD9tmlVJTfl9KeE0iDktouJus.iPO4vDT4iTV7JuRBGnK', 'Nardos', 'Gebre', 'Van Welderenstraat 9, 6511MS, Nijmegen', 1);
+-- -- Insert statements for 20 users with realistic names
+INSERT INTO [User] (username, [password], first_name, last_name, [role]) VALUES
+('jdoe', 'wachtwoord', 'John', 'Doe', 'Client'),
+('mvermeer', 'wachtwoord', 'Maria', 'Vermeer', 'Client'),
+('rdeboer', 'wachtwoord', 'Rik', 'de Boer', 'Personnel'),
+('sbakker', 'wachtwoord', 'Sophie', 'Bakker', 'Personnel'),
+('fholwerda', 'wachtwoord', 'Fenna', 'Holwerda', 'Client'),
+('kdijkstra', 'wachtwoord', 'Klaas', 'Dijkstra', 'Client'),
+('lheineken', 'wachtwoord', 'Lucas', 'Heineken', 'Personnel'),
+('mvandam', 'wachtwoord', 'Mila', 'van Dam', 'Personnel'),
+('gkoolstra', 'wachtwoord', 'Gert', 'Koolstra', 'Client'),
+('evisscher', 'wachtwoord', 'Emma', 'Visscher', 'Client'),
+('tjanssen', 'wachtwoord', 'Tom', 'Janssen', 'Personnel'),
+('abrouwer', 'wachtwoord', 'Anna', 'Brouwer', 'Personnel'),
+('wbos', 'wachtwoord', 'Willem', 'Bos', 'Client'),
+('tvandermeer', 'wachtwoord', 'Tessa', 'van der Meer', 'Client'),
+('rkramer', 'wachtwoord', 'Rob', 'Kramer', 'Personnel'),
+('mnijland', 'wachtwoord', 'Maud', 'Nijland', 'Personnel'),
+('dschouten', 'wachtwoord', 'David', 'Schouten', 'Client'),
+('hdeleeuw', 'wachtwoord', 'Hanna', 'de Leeuw', 'Client'),
+('pvanveen', 'wachtwoord', 'Peter', 'van Veen', 'Personnel'),
+('adekhane', 'wachtwoord', 'Ahmed', 'Dekhane', 'Client'), 
+('mbouaziz', 'wachtwoord', 'Mouna', 'Bouaziz', 'Client'), 
+('tbayrak', 'wachtwoord', 'Tarik', 'Bayrak', 'Personnel'), 
+('ayildiz', 'wachtwoord', 'Aylin', 'Yildiz', 'Personnel'), 
+('rnarsingh', 'wachtwoord', 'Rajesh', 'Narsingh', 'Client'), 
+('sdurga', 'wachtwoord', 'Shanti', 'Durga', 'Client'), 
+('mkassem', 'wachtwoord', 'Mohammed', 'Kassem', 'Personnel'), 
+('lsaleh', 'wachtwoord', 'Lina', 'Saleh', 'Personnel'), 
+('aghebre', 'wachtwoord', 'Amanuel', 'Ghebre', 'Client'), 
+('mtsega', 'wachtwoord', 'Miriam', 'Tsega', 'Client'), 
+('pkowalski', 'wachtwoord', 'Piotr', 'Kowalski', 'Personnel'), 
+('aivanov', 'wachtwoord', 'Alexei', 'Ivanov', 'Personnel'), 
+('mkarimi', 'wachtwoord', 'Mina', 'Karimi', 'Client'), 
+('hradman', 'wachtwoord', 'Hassan', 'Radman', 'Client'), 
+('lbaloyi', 'wachtwoord', 'Lerato', 'Baloyi', 'Personnel'), 
+('dpetrov', 'wachtwoord', 'Dmitri', 'Petrov', 'Personnel'), 
+('ibrahimovic', 'wachtwoord', 'Ismail', 'Brahimovic', 'Client'), 
+('snovak', 'wachtwoord', 'Sanja', 'Novak', 'Client'), 
+('yabebe', 'wachtwoord', 'Yonas', 'Abebe', 'Personnel'), 
+('ngebre', 'wachtwoord', 'Nardos', 'Gebre', 'Personnel'); 
 
--- Insert statements voor product types
-INSERT INTO ProductType (typeName) VALUES
+-- Insert statements for product types
+INSERT INTO ProductType ([name]) VALUES
 ('Pizza'),
 ('Maaltijd'),
 ('Specerij'),
 ('Voorgerecht'),
 ('Drank');
 
--- Insert statements voor ingredients
-INSERT INTO Ingredient (ingredientName) VALUES
+-- Insert statements for ingredients
+INSERT INTO Ingredient ([name]) VALUES
 ('Tomaat'),
 ('Kaas'),
 ('Pepperoni'),
@@ -157,120 +143,122 @@ INSERT INTO Ingredient (ingredientName) VALUES
 ('Spek'),
 ('Saus');
 
--- Insert statements voor products
-INSERT INTO Product (productName, price, typeId) VALUES
-('Margherita Pizza', 9.99, 1),
-('Pepperoni Pizza', 11.99, 1),
-('Vegetarische Pizza', 10.99, 1),
-('Hawaiian Pizza', 12.99, 1),
-('Combinatiemaaltijd', 15.99, 2),
-('Knoflookbrood', 4.99, 4),
-('Coca Cola', 2.49, 5),
-('Sprite', 2.49, 5);
+-- Insert statements for products
+INSERT INTO Product ([name], price, type_id) VALUES
+('Margherita Pizza', 9.99, 'Pizza'),
+('Pepperoni Pizza', 11.99, 'Pizza'),
+('Vegetarische Pizza', 10.99, 'Pizza'),
+('Hawaiian Pizza', 12.99, 'Pizza'),
+('Combinatiemaaltijd', 15.99, 'Maaltijd'),
+('Knoflookbrood', 4.99, 'Voorgerecht'),
+('Coca Cola', 2.49, 'Drank'),
+('Sprite', 2.49, 'Drank');
 
--- Insert statements voor product-ingredient relationships
-INSERT INTO Product_Ingredient (productId, ingredientId) VALUES
-(1, 1), -- Margherita Pizza met Tomaat
-(1, 2), -- Margherita Pizza met Kaas
-(2, 1), -- Pepperoni Pizza met Tomaat
-(2, 2), -- Pepperoni Pizza met Kaas
-(2, 3), -- Pepperoni Pizza met Pepperoni
-(3, 1), -- Vegetarische Pizza met Tomaat
-(3, 2), -- Vegetarische Pizza met Kaas
-(3, 4), -- Vegetarische Pizza met Champignon
-(3, 5), -- Vegetarische Pizza met Ui
-(4, 1), -- Hawaiian Pizza met Tomaat
-(4, 2), -- Hawaiian Pizza met Kaas
-(4, 3), -- Hawaiian Pizza met Pepperoni
-(4, 5), -- Hawaiian Pizza met Ui
-(4, 6), -- Hawaiian Pizza met Sla
-(4, 7), -- Hawaiian Pizza met Spek
-(4, 8), -- Hawaiian Pizza met Saus
-(5, 1), -- Combinatiemaaltijd met Tomaat
-(5, 2), -- Combinatiemaaltijd met Kaas
-(5, 3), -- Combinatiemaaltijd met Pepperoni
-(5, 4), -- Combinatiemaaltijd met Champignon
-(5, 5), -- Combinatiemaaltijd met Ui
-(5, 6), -- Combinatiemaaltijd met Sla
-(5, 7), -- Combinatiemaaltijd met Spek
-(5, 8); -- Combinatiemaaltijd met Saus
+-- Insert statements for product-ingredient relationships
+INSERT INTO Product_Ingredient (product_name, ingredient_name) VALUES
+('Margherita Pizza', 'Tomaat'), -- Margherita Pizza met Tomaat
+('Margherita Pizza', 'Kaas'), -- Margherita Pizza met Kaas
+('Pepperoni Pizza', 'Tomaat'), -- Pepperoni Pizza met Tomaat
+('Pepperoni Pizza', 'Kaas'), -- Pepperoni Pizza met Kaas
+('Pepperoni Pizza', 'Pepperoni'), -- Pepperoni Pizza met Pepperoni
+('Vegetarische Pizza', 'Tomaat'), -- Vegetarische Pizza met Tomaat
+('Vegetarische Pizza', 'Kaas'), -- Vegetarische Pizza met Kaas
+('Vegetarische Pizza', 'Champignon'), -- Vegetarische Pizza met Champignon
+('Vegetarische Pizza', 'Ui'), -- Vegetarische Pizza met Ui
+('Hawaiian Pizza', 'Tomaat'), -- Hawaiian Pizza met Tomaat
+('Hawaiian Pizza', 'Kaas'), -- Hawaiian Pizza met Kaas
+('Hawaiian Pizza', 'Pepperoni'), -- Hawaiian Pizza met Pepperoni
+('Hawaiian Pizza', 'Ui'), -- Hawaiian Pizza met Ui
+('Hawaiian Pizza', 'Sla'), -- Hawaiian Pizza met Sla
+('Hawaiian Pizza', 'Spek'), -- Hawaiian Pizza met Spek
+('Hawaiian Pizza', 'Saus'), -- Hawaiian Pizza met Saus
+('Combinatiemaaltijd', 'Tomaat'), -- Combinatiemaaltijd met Tomaat
+('Combinatiemaaltijd', 'Kaas'), -- Combinatiemaaltijd met Kaas
+('Combinatiemaaltijd', 'Pepperoni'), -- Combinatiemaaltijd met Pepperoni
+('Combinatiemaaltijd', 'Champignon'), -- Combinatiemaaltijd met Champignon
+('Combinatiemaaltijd', 'Ui'), -- Combinatiemaaltijd met Ui
+('Combinatiemaaltijd', 'Sla'), -- Combinatiemaaltijd met Sla
+('Combinatiemaaltijd', 'Spek'), -- Combinatiemaaltijd met Spek
+('Combinatiemaaltijd', 'Saus'); -- Combinatiemaaltijd met Saus
 
--- Insert statements voor pizza orders
-INSERT INTO [Pizza_Order] (clientId, employeeId, orderDateTime, statusId, deliveryAddress) VALUES
-(1, 3, '2024-06-12 18:45:00', 1, 'Bakkerstraat 1, 6811EG, Arnhem'),
-(2, 4, '2024-06-12 19:00:00', 2, 'Jansplein 2, 6811GD, Arnhem'),
-(3, 5, '2024-06-12 19:15:00', 1, 'Willemsplein 3, 6811KD, Arnhem'),
-(4, 6, '2024-06-12 19:30:00', 2, 'Kerkstraat 4, 6811DW, Arnhem'),
-(5, 7, '2024-06-12 19:45:00', 3, 'Rijnkade 5, 6811HA, Arnhem'),
-(6, 8, '2024-06-12 20:00:00', 1, 'Grote Markt 6, 6511KB, Nijmegen'),
-(7, 9, '2024-06-12 20:15:00', 2, 'Sint Annastraat 7, 6524EZ, Nijmegen'),
-(8, 10, '2024-06-12 20:30:00', 3, 'Oranjesingel 8, 6511NV, Nijmegen'),
-(9, 11, '2024-06-12 20:45:00', 1, 'Van Welderenstraat 9, 6511MS, Nijmegen'),
-(10, 12, '2024-06-12 21:00:00', 2, 'Molenstraat 10, 6511HJ, Nijmegen'),
-(11, 13, '2024-06-13 18:45:00', 1, 'Velperweg 11, 6814AD, Arnhem'),
-(12, 14, '2024-06-13 19:00:00', 2, 'Geitenkamp 12, 6815AP, Arnhem'),
-(13, 15, '2024-06-13 19:15:00', 1, 'IJssellaan 13, 6821DJ, Arnhem'),
-(14, 16, '2024-06-13 19:30:00', 2, 'Broekstraat 14, 6822GD, Arnhem'),
-(15, 17, '2024-06-13 19:45:00', 3, 'Apeldoornsestraat 15, 6828AJ, Arnhem'),
-(16, 18, '2024-06-13 20:00:00', 1, 'Marialaan 16, 6541RP, Nijmegen'),
-(17, 19, '2024-06-13 20:15:00', 2, 'Smetiusstraat 17, 6511EP, Nijmegen'),
-(18, 20, '2024-06-13 20:30:00', 3, 'Van Oldenbarneveltstraat 18, 6511PA, Nijmegen'),
-(19, 21, '2024-06-13 20:45:00', 1, 'Hertogstraat 19, 6511RV, Nijmegen'),
-(20, 22, '2024-06-13 21:00:00', 2, 'Van Schaeck Mathonsingel 20, 6512AP, Nijmegen'),
-(21, 23, '2024-06-14 18:45:00', 1, 'Lange Hezelstraat 21, 6511CM, Nijmegen'),
-(22, 24, '2024-06-14 19:00:00', 2, 'Waalkade 22, 6511XR, Nijmegen'),
-(23, 25, '2024-06-14 19:15:00', 1, 'Sint Jacobslaan 23, 6533BT, Nijmegen'),
-(24, 26, '2024-06-14 19:30:00', 2, 'Van Broeckhuysenstraat 24, 6511PE, Nijmegen'),
-(25, 27, '2024-06-14 19:45:00', 3, 'Ziekerstraat 25, 6511LH, Nijmegen');
+-- Insert statements for pizza orders
+INSERT INTO [Pizza_Order] (client_username, client_name, personnel_username, datetime, status, address) VALUES
+('jdoe', 'John Doe', 'rdeboer', '2024-06-12 18:45:00', 1, 'Bakkerstraat 1, 6811EG, Arnhem'),
+('mvermeer', 'Maria Vermeer', 'sbakker', '2024-06-12 19:00:00', 2, 'Jansplein 2, 6811GD, Arnhem'),
+('fholwerda', 'Fenna Holwerda', 'lheineken', '2024-06-12 19:15:00', 1, 'Willemsplein 3, 6811KD, Arnhem'),
+('kdijkstra', 'Klaas Dijkstra', 'mvandam', '2024-06-12 19:30:00', 2, 'Kerkstraat 4, 6811DW, Arnhem'),
+('gkoolstra', 'Gert Koolstra', 'tjanssen', '2024-06-12 19:45:00', 3, 'Rijnkade 5, 6811HA, Arnhem'),
+(NULL, 'Pieter Post', 'abrouwer', '2024-06-12 20:00:00', 1, 'Grote Markt 6, 6511KB, Nijmegen'),
+(NULL, 'Anna Smits', 'wbos', '2024-06-12 20:15:00', 2, 'Sint Annastraat 7, 6524EZ, Nijmegen'),
+(NULL, 'Bert van Dijk', 'tvandermeer', '2024-06-12 20:30:00', 3, 'Oranjesingel 8, 6511NV, Nijmegen'),
+(NULL, 'Sara de Vries', 'rkramer', '2024-06-12 20:45:00', 1, 'Van Welderenstraat 9, 6511MS, Nijmegen'),
+(NULL, 'Jan Jansen', 'mnijland', '2024-06-12 21:00:00', 2, 'Molenstraat 10, 6511HJ, Nijmegen'),
+('dschouten', 'David Schouten', 'hdeleeuw', '2024-06-13 18:45:00', 1, 'Velperweg 11, 6814AD, Arnhem'),
+('evisscher', 'Emma Visscher', 'pvanveen', '2024-06-13 19:00:00', 2, 'Geitenkamp 12, 6815AP, Arnhem'),
+('adekhane', 'Ahmed Dekhane', 'ayildiz', '2024-06-13 19:15:00', 1, 'IJssellaan 13, 6821DJ, Arnhem'),
+('wbos', 'Willem Bos', 'tbayrak', '2024-06-13 19:30:00', 2, 'Broekstraat 14, 6822GD, Arnhem'),
+('mnijland', 'Maud Nijland', 'mkassem', '2024-06-13 19:45:00', 3, 'Apeldoornsestraat 15, 6828AJ, Arnhem'),
+(NULL, 'Els de Boer', 'lsaleh', '2024-06-13 20:00:00', 1, 'Marialaan 16, 6541RP, Nijmegen'),
+(NULL, 'Tom Bakker', 'pkowalski', '2024-06-13 20:15:00', 2, 'Smetiusstraat 17, 6511EP, Nijmegen'),
+(NULL, 'Mila Janssen', 'aivanov', '2024-06-13 20:30:00', 3, 'Van Oldenbarneveltstraat 18, 6511PA, Nijmegen'),
+(NULL, 'Lars de Groot', 'mkarimi', '2024-06-13 20:45:00', 1, 'Hertogstraat 19, 6511RV, Nijmegen'),
+(NULL, 'Rik Kramer', 'dpetrov', '2024-06-13 21:00:00', 2, 'Van Schaeck Mathonsingel 20, 6512AP, Nijmegen'),
+(NULL, 'Sophie van der Meer', 'ibrahimovic', '2024-06-14 18:45:00', 1, 'Lange Hezelstraat 21, 6511CM, Nijmegen'),
+('rdeboer', 'Rik de Boer', 'sbakker', '2024-06-14 19:00:00', 2, 'Waalkade 22, 6511XR, Nijmegen'),
+('mvermeer', 'Maria Vermeer', 'lheineken', '2024-06-14 19:15:00', 1, 'Sint Jacobslaan 23, 6533BT, Nijmegen'),
+('jdoe', 'John Doe', 'mvandam', '2024-06-14 19:30:00', 2, 'Van Broeckhuysenstraat 24, 6511PE, Nijmegen'),
+(NULL, 'Henk de Wit', 'gkoolstra', '2024-06-14 19:45:00', 3, 'Ziekerstraat 25, 6511LH, Nijmegen');
 
--- Insert statements voor Pizza_Order_Product
-INSERT INTO Pizza_Order_Product (orderId, productId, quantity) VALUES
-(1, 1, 2), -- 2x Margherita Pizza voor order 1
-(1, 7, 3), -- 3x Coca Cola voor order 1
-(2, 2, 1), -- 1x Pepperoni Pizza voor order 2
-(2, 8, 2), -- 2x Sprite voor order 2
-(3, 3, 1), -- 1x Vegetarische Pizza voor order 3
-(3, 4, 1), -- 1x Hawaiian Pizza voor order 3
-(4, 5, 2), -- 2x Combinatiemaaltijd voor order 4
-(4, 6, 1), -- 1x Knoflookbrood voor order 4
-(5, 2, 1), -- 1x Pepperoni Pizza voor order 5
-(6, 4, 2), -- 2x Hawaiian Pizza voor order 6
-(6, 7, 2), -- 2x Coca Cola voor order 6
-(7, 5, 2), -- 2x Combinatiemaaltijd voor order 7
-(8, 6, 2), -- 2x Knoflookbrood voor order 8
-(8, 8, 1), -- 1x Sprite voor order 8
-(9, 2, 1), -- 1x Pepperoni Pizza voor order 9
-(10, 4, 2), -- 2x Hawaiian Pizza voor order 10
-(10, 7, 2), -- 2x Coca Cola voor order 10
-(11, 1, 2), -- 2x Margherita Pizza voor order 11
-(12, 3, 1), -- 1x Vegetarische Pizza voor order 12
-(13, 4, 3), -- 3x Hawaiian Pizza voor order 13
-(13, 7, 1), -- 1x Coca Cola voor order 13
-(14, 5, 1), -- 1x Combinatiemaaltijd voor order 14
-(14, 6, 1), -- 1x Knoflookbrood voor order 14
-(15, 2, 2), -- 2x Pepperoni Pizza voor order 15
-(15, 8, 2), -- 2x Sprite voor order 15
-(16, 1, 1), -- 1x Margherita Pizza voor order 16
-(17, 3, 2), -- 2x Vegetarische Pizza voor order 17
-(18, 4, 1), -- 1x Hawaiian Pizza voor order 18
-(19, 5, 2), -- 2x Combinatiemaaltijd voor order 19
-(19, 6, 1), -- 1x Knoflookbrood voor order 19
-(20, 2, 3), -- 3x Pepperoni Pizza voor order 20
-(21, 4, 2), -- 2x Hawaiian Pizza voor order 21
-(21, 7, 1), -- 1x Coca Cola voor order 21
-(22, 1, 2), -- 2x Margherita Pizza voor order 22
-(22, 6, 1), -- 1x Knoflookbrood voor order 22
-(23, 2, 1), -- 1x Pepperoni Pizza voor order 23
-(24, 3, 2), -- 2x Vegetarische Pizza voor order 24
-(25, 4, 2), -- 2x Hawaiian Pizza voor order 25
-(25, 8, 1); -- 1x Sprite voor order 25
+
+-- Insert statements for Pizza_Order_Product (dummy data for orders)
+INSERT INTO Pizza_Order_Product (order_id, product_name, quantity) VALUES
+(1, 'Margherita Pizza', 2),
+(1, 'Coca Cola', 3),
+(2, 'Pepperoni Pizza', 1),
+(2, 'Sprite', 2),
+(3, 'Vegetarische Pizza', 1),
+(3, 'Hawaiian Pizza', 1),
+(4, 'Combinatiemaaltijd', 2),
+(4, 'Knoflookbrood', 1),
+(5, 'Pepperoni Pizza', 1),
+(6, 'Margherita Pizza', 3),
+(6, 'Hawaiian Pizza', 2),
+(7, 'Combinatiemaaltijd', 2),
+(8, 'Knoflookbrood', 2),
+(8, 'Sprite', 1),
+(9, 'Pepperoni Pizza', 1),
+(10, 'Hawaiian Pizza', 2),
+(10, 'Coca Cola', 2),
+(11, 'Margherita Pizza', 2),
+(12, 'Vegetarische Pizza', 1),
+(13, 'Hawaiian Pizza', 3),
+(13, 'Coca Cola', 1),
+(14, 'Combinatiemaaltijd', 1),
+(14, 'Knoflookbrood', 1),
+(15, 'Pepperoni Pizza', 2),
+(15, 'Sprite', 2),
+(16, 'Margherita Pizza', 1),
+(17, 'Vegetarische Pizza', 2),
+(18, 'Hawaiian Pizza', 1),
+(19, 'Combinatiemaaltijd', 2),
+(19, 'Knoflookbrood', 1),
+(20, 'Pepperoni Pizza', 3),
+(21, 'Hawaiian Pizza', 2),
+(21, 'Coca Cola', 1),
+(22, 'Margherita Pizza', 2),
+(22, 'Knoflookbrood', 1),
+(23, 'Pepperoni Pizza', 1),
+(24, 'Vegetarische Pizza', 2),
+(25, 'Hawaiian Pizza', 2),
+(25, 'Sprite', 1);
+
 
 -- pak de oudste en de nieuwste datum
 declare @date_start datetime;
 declare @date_end datetime;
 
-select @date_start = MIN(orderDateTime) from Pizza_Order;
-select @date_end   = max(orderDateTime) from Pizza_Order;
+select @date_start = MIN(datetime) from Pizza_Order;
+select @date_end   = max(datetime) from Pizza_Order;
 
 -- Bereken aan de hand van het verschil de middelste datum tussen start en eind
 declare @diff int;
@@ -283,6 +271,6 @@ set @middle_date = DATEADD(minute, @diff/2, @date_start);
 set @diff = DATEDIFF(minute, @middle_date, GETDATE());
 
 -- update vlucht vertrektijden en passagier inchecktijd
-update Pizza_Order set orderDateTime = DATEADD(minute, @diff, orderDateTime);
+update Pizza_Order set [datetime] = DATEADD(minute, @diff, datetime);
 
 go
