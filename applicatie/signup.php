@@ -23,11 +23,10 @@
         $lastName          = trim(strip_tags($_POST['lastName']));
         $address          = trim(strip_tags($_POST['address']));
 
-        // Validatie voor verplichte velden
         if (empty($username)) {
             $errors[] = "Gebruikersnaam is verplicht";
         } else {
-            // Check of gebruikersnaam al bestaat
+
             $checkUsername = "SELECT COUNT(*) FROM [User] WHERE username = :username";
             $query = $db->prepare($checkUsername);
             $query->execute(['username' => $username]);
@@ -60,14 +59,14 @@
             $errors[] = "Adres mag niet langer zijn dan 255 karakters";
         }
 
-        if (!empty($errors)) {  // Change from count($errors) > 0
+        if (!empty($errors)) { 
             $message = "<div>";
             foreach ($errors as $error) {
                 $message .= "<li>$error</li>";
             }
             $message .= "</div>";
         } else {
-            // Your existing account creation code
+            
             $passwordhash = password_hash($password, PASSWORD_DEFAULT);
             $role = checkIsEmployee() ? 1 : 0;
         

@@ -8,9 +8,8 @@ require_once 'db_connectie.php';
 
 $db = maakVerbinding();
 
-$query = 'SELECT productId, productName, price, typeName 
-          FROM [pizzeria].[dbo].[Product] p 
-          INNER JOIN [pizzeria].[dbo].[ProductType] pt ON p.typeId = pt.typeId';
+$query = 'SELECT productName, price, typeName 
+          FROM [pizzeria].[dbo].[Product] p';
 
 $data = $db->query($query);
 $products = [];
