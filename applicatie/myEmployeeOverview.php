@@ -3,11 +3,11 @@ session_start();
 require_once './db_connectie.php';
 
 if (!isset($_SESSION['username'])) {
-    die("Je moet ingelogd zijn om je bestellingen te kunnen bekijken.");
+    die("Alleen ingelogd personeel heeft toegang.");
 }
 
 $db = maakVerbinding();
-$clientUsername = $_SESSION['username'];
+$personnelUsername = $_SESSION['username'];
 
 $statusStmt = $db->query("SELECT status_id, status_name FROM Status");
 $statuses = $statusStmt->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -15,9 +15,9 @@ $statuses = $statusStmt->fetchAll(PDO::FETCH_KEY_PAIR);
 $stmt = $db->prepare("SELECT po.*, s.status_name 
                       FROM Pizza_Order po
                       JOIN Status s ON po.status_id = s.status_id
-                      WHERE po.client_username = :username
+                      WHERE po.personnel_username = :username
                       ORDER BY datetime DESC");
-$stmt->execute([':username' => $clientUsername]);
+$stmt->execute([':username' => $personnelUsername]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -28,17 +28,17 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Mijn bestellingen</title>
 </head>
 <body>
-    <h1>Mijn bestellingen, <?= htmlspecialchars($clientUsername) ?></h1>
-    <p><a href="index.php">← Terug naar home</a></p>
+    <h1>Mijn bestellingen (<?= htmlspecialchars($personnelUsername) ?>)</h1>
+    <p><a href="employeeOverview.php">← Terug naar overzicht</a></p>
 
     <?php if (count($orders) === 0): ?>
-        <p>Je hebt nog geen bestellingen geplaatst.</p>
+        <p>Je hebt nog geen bestellingen toegewezen gekregen.</p>
     <?php else: ?>
         <table border="1" cellpadding="5">
             <thead>
                 <tr>
-                    <th>Order ID</th>
-                    <th>Naam</th>
+                    <th>ID</th>
+                    <th>Naam klant</th>
                     <th>Adres</th>
                     <th>Datum</th>
                     <th>Status</th>

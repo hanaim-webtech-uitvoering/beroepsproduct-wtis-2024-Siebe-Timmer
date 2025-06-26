@@ -68,10 +68,10 @@
         } else {
             
             $passwordhash = password_hash($password, PASSWORD_DEFAULT);
-            $role = checkIsEmployee() ? 1 : 0;
+            $role = checkIsEmployee() ? 'Personnel' : 'Client';
         
             $signupQuery = 'INSERT INTO [User](username, password, first_name, last_name, address, role)
-                    values (:username, :password, :first_name, :last_name, :address, :isEmployee)';
+                    values (:username, :password, :first_name, :last_name, :address, :role)';
             $query = $db->prepare($signupQuery);
             $data = $query->execute([
                 'username' => $username,
@@ -79,7 +79,7 @@
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'address' => $address,
-                'isEmployee' => $role,
+                'role' => $role,
             ]);
             $message = "Account succesvol aangemaakt!";
         }

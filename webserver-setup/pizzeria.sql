@@ -67,7 +67,7 @@ CREATE TABLE [Pizza_Order] (
   [order_id] INT PRIMARY KEY IDENTITY(1, 1),
   [client_username] NVARCHAR(255),
   [client_name] NVARCHAR(255) NOT NULL,
-  [personnel_username] NVARCHAR(255) NOT NULL,
+  [personnel_username] NVARCHAR(255),
   [datetime] DATETIME NOT NULL,
   [status_id] INT,
   [address] NVARCHAR(255)
