@@ -2,7 +2,7 @@
 IF OBJECT_ID('User', 'U') IS NOT NULL
     DROP TABLE [User];
 
-IF OBJECT_ID('ProductType', 'U') IS NOT NULL
+IF OBJECT_ID('Product_Type', 'U') IS NOT NULL
     DROP TABLE ProductType;
 
 IF OBJECT_ID('Ingredient', 'U') IS NOT NULL
@@ -32,28 +32,36 @@ CREATE TABLE [User] (
 );
 
 -- Create ProductType table
-CREATE TABLE [ProductType] (
-  [name] NVARCHAR(255) PRIMARY KEY
+CREATE TABLE [Product_Type] (
+  [type_id] INT PRIMARY KEY NOT NULL,
+  [name] NVARCHAR(255) UNIQUE
 );
 
 -- Create Ingredient table
 CREATE TABLE [Ingredient] (
-  [name] NVARCHAR(255) PRIMARY KEY
+  [ingredient_id] INT PRIMARY KEY NOT NULL,
+  [name] NVARCHAR(255) UNIQUE
 );
 
 -- Create Product table
 CREATE TABLE [Product] (
-  [name] NVARCHAR(255) PRIMARY KEY,
+  [product_id] INT PRIMARY KEY NOT NULL,
+  [name] NVARCHAR(255) UNIQUE,
   [price] DECIMAL(10,2) NOT NULL,
-  [type_id] NVARCHAR(255) NOT NULL
+  [type_id] INT NOT NULL
 );
 
 -- Create Product_Ingredient table
 CREATE TABLE [Product_Ingredient] (
-  [product_name] NVARCHAR(255),
-  [ingredient_name] NVARCHAR(255),
-  PRIMARY KEY ([product_name], [ingredient_name])
+  [product_id] INT,
+  [ingredient_id] INT,
+  PRIMARY KEY ([product_id], [ingredient_id])
 );
+
+CREATE TABLE [Status](
+  [status_id] INT PRIMARY KEY NOT NULL,
+  [status_name] NVARCHAR(255) UNIQUE 
+)
 
 CREATE TABLE [Pizza_Order] (
   [order_id] INT PRIMARY KEY IDENTITY(1, 1),
@@ -61,26 +69,27 @@ CREATE TABLE [Pizza_Order] (
   [client_name] NVARCHAR(255) NOT NULL,
   [personnel_username] NVARCHAR(255) NOT NULL,
   [datetime] DATETIME NOT NULL,
-  [status] INT,
+  [status_id] INT,
   [address] NVARCHAR(255)
 )
 
 -- Create Pizza_Order_Product table
 CREATE TABLE [Pizza_Order_Product] (
-  [order_id] INT,
-  [product_name] NVARCHAR(255),
+  [order_id] INT NOT NULL,
+  [product_id] INT NOT NULL,
   [quantity] INT NOT NULL,
-  PRIMARY KEY ([order_id], [product_name])
+  PRIMARY KEY ([order_id], [product_id])
 );
 
 -- -- Add foreign key constraints
-ALTER TABLE [Product] ADD FOREIGN KEY ([type_id]) REFERENCES [ProductType] ([name]);
-ALTER TABLE [Product_Ingredient] ADD FOREIGN KEY ([product_name]) REFERENCES [Product] ([name]);
-ALTER TABLE [Product_Ingredient] ADD FOREIGN KEY ([ingredient_name]) REFERENCES [Ingredient] ([name]);
+ALTER TABLE [Product] ADD FOREIGN KEY ([type_id]) REFERENCES [Product_Type] ([type_id]);
+ALTER TABLE [Product_Ingredient] ADD FOREIGN KEY ([product_id]) REFERENCES [Product] ([product_id]);
+ALTER TABLE [Product_Ingredient] ADD FOREIGN KEY ([ingredient_id]) REFERENCES [Ingredient] ([ingredient_id]);
 ALTER TABLE [Pizza_Order] ADD FOREIGN KEY ([client_username]) REFERENCES [User] ([username]);
 ALTER TABLE [Pizza_Order] ADD FOREIGN KEY ([personnel_username]) REFERENCES [User] ([username]);
+ALTER TABLE [Pizza_Order] ADD FOREIGN KEY ([status_id]) REFERENCES [Status] ([status_id]);
 ALTER TABLE [Pizza_Order_Product] ADD FOREIGN KEY ([order_id]) REFERENCES [Pizza_Order] ([order_id]);
-ALTER TABLE [Pizza_Order_Product] ADD FOREIGN KEY ([product_name]) REFERENCES [Product] ([name]);
+ALTER TABLE [Pizza_Order_Product] ADD FOREIGN KEY ([product_id]) REFERENCES [Product] ([product_id]);
 
 -- -- Insert statements for 20 users with realistic names
 INSERT INTO [User] (username, [password], first_name, last_name, [role]) VALUES
@@ -125,64 +134,70 @@ INSERT INTO [User] (username, [password], first_name, last_name, [role]) VALUES
 ('ngebre', '$2y$10$MjSXR9T9UOuozLIxHzvr3uaxhUjERjn3d2qTHiqEvfCtOCHcFZSGK', 'Nardos', 'Gebre', 'Personnel'); 
 
 -- Insert statements for product types
-INSERT INTO ProductType ([name]) VALUES
-('Pizza'),
-('Maaltijd'),
-('Specerij'),
-('Voorgerecht'),
-('Drank');
+INSERT INTO Product_Type (type_id, [name]) VALUES
+(1, 'Pizza'),
+(2, 'Maaltijd'),
+(3, 'Specerij'),
+(4, 'Voorgerecht'),
+(5, 'Drank');
 
 -- Insert statements for ingredients
-INSERT INTO Ingredient ([name]) VALUES
-('Tomaat'),
-('Kaas'),
-('Pepperoni'),
-('Champignon'),
-('Ui'),
-('Sla'),
-('Spek'),
-('Saus');
+INSERT INTO Ingredient (ingredient_id, [name]) VALUES
+(1, 'Tomaat'),
+(2, 'Kaas'),
+(3, 'Pepperoni'),
+(4, 'Champignon'),
+(5, 'Ui'),
+(6, 'Sla'),
+(7, 'Spek'),
+(8, 'Saus');
 
 -- Insert statements for products
-INSERT INTO Product ([name], price, type_id) VALUES
-('Margherita Pizza', 9.99, 'Pizza'),
-('Pepperoni Pizza', 11.99, 'Pizza'),
-('Vegetarische Pizza', 10.99, 'Pizza'),
-('Hawaiian Pizza', 12.99, 'Pizza'),
-('Combinatiemaaltijd', 15.99, 'Maaltijd'),
-('Knoflookbrood', 4.99, 'Voorgerecht'),
-('Coca Cola', 2.49, 'Drank'),
-('Sprite', 2.49, 'Drank');
+INSERT INTO Product (product_id, [name], price, type_id) VALUES
+(1, 'Margherita Pizza', 9.99, 1),
+(2, 'Pepperoni Pizza', 11.99, 1),
+(3, 'Vegetarische Pizza', 10.99, 1),
+(4, 'Hawaiian Pizza', 12.99, 1),
+(5, 'Combinatiemaaltijd', 15.99, 2),
+(6, 'Knoflookbrood', 4.99, 4),
+(7, 'Coca Cola', 2.49, 5),
+(8, 'Sprite', 2.49, 5);
 
 -- Insert statements for product-ingredient relationships
-INSERT INTO Product_Ingredient (product_name, ingredient_name) VALUES
-('Margherita Pizza', 'Tomaat'), -- Margherita Pizza met Tomaat
-('Margherita Pizza', 'Kaas'), -- Margherita Pizza met Kaas
-('Pepperoni Pizza', 'Tomaat'), -- Pepperoni Pizza met Tomaat
-('Pepperoni Pizza', 'Kaas'), -- Pepperoni Pizza met Kaas
-('Pepperoni Pizza', 'Pepperoni'), -- Pepperoni Pizza met Pepperoni
-('Vegetarische Pizza', 'Tomaat'), -- Vegetarische Pizza met Tomaat
-('Vegetarische Pizza', 'Kaas'), -- Vegetarische Pizza met Kaas
-('Vegetarische Pizza', 'Champignon'), -- Vegetarische Pizza met Champignon
-('Vegetarische Pizza', 'Ui'), -- Vegetarische Pizza met Ui
-('Hawaiian Pizza', 'Tomaat'), -- Hawaiian Pizza met Tomaat
-('Hawaiian Pizza', 'Kaas'), -- Hawaiian Pizza met Kaas
-('Hawaiian Pizza', 'Pepperoni'), -- Hawaiian Pizza met Pepperoni
-('Hawaiian Pizza', 'Ui'), -- Hawaiian Pizza met Ui
-('Hawaiian Pizza', 'Sla'), -- Hawaiian Pizza met Sla
-('Hawaiian Pizza', 'Spek'), -- Hawaiian Pizza met Spek
-('Hawaiian Pizza', 'Saus'), -- Hawaiian Pizza met Saus
-('Combinatiemaaltijd', 'Tomaat'), -- Combinatiemaaltijd met Tomaat
-('Combinatiemaaltijd', 'Kaas'), -- Combinatiemaaltijd met Kaas
-('Combinatiemaaltijd', 'Pepperoni'), -- Combinatiemaaltijd met Pepperoni
-('Combinatiemaaltijd', 'Champignon'), -- Combinatiemaaltijd met Champignon
-('Combinatiemaaltijd', 'Ui'), -- Combinatiemaaltijd met Ui
-('Combinatiemaaltijd', 'Sla'), -- Combinatiemaaltijd met Sla
-('Combinatiemaaltijd', 'Spek'), -- Combinatiemaaltijd met Spek
-('Combinatiemaaltijd', 'Saus'); -- Combinatiemaaltijd met Saus
+INSERT INTO Product_Ingredient (product_id, ingredient_id) VALUES
+(1, 1), -- Margherita Pizza met Tomaat
+(1, 2), -- Margherita Pizza met Kaas
+(2, 1), -- Pepperoni Pizza met Tomaat
+(2, 2), -- Pepperoni Pizza met Kaas
+(2, 3), -- Pepperoni Pizza met Pepperoni
+(3, 1), -- Vegetarische Pizza met Tomaat
+(3, 2), -- Vegetarische Pizza met Kaas
+(3, 4), -- Vegetarische Pizza met Champignon
+(3, 5), -- Vegetarische Pizza met Ui
+(4, 1), -- Hawaiian Pizza met Tomaat
+(4, 2), -- Hawaiian Pizza met Kaas
+(4, 3), -- Hawaiian Pizza met Pepperoni
+(4, 5), -- Hawaiian Pizza met Ui
+(4, 6), -- Hawaiian Pizza met Sla
+(4, 7), -- Hawaiian Pizza met Spek
+(4, 8), -- Hawaiian Pizza met Saus
+(5, 1), -- Combinatiemaaltijd met Tomaat
+(5, 2), -- Combinatiemaaltijd met Kaas
+(5, 3), -- Combinatiemaaltijd met Pepperoni
+(5, 4), -- Combinatiemaaltijd met Champignon
+(5, 5), -- Combinatiemaaltijd met Ui
+(5, 6), -- Combinatiemaaltijd met Sla
+(5, 7), -- Combinatiemaaltijd met Spek
+(5, 8); -- Combinatiemaaltijd met Saus
+
+INSERT INTO [Status] (status_id, status_name) VALUES
+(1, 'Ontvangen'),
+(2, 'Wordt bereid'),
+(3, 'Onderweg'),
+(4, 'Geleverd');
 
 -- Insert statements for pizza orders
-INSERT INTO [Pizza_Order] (client_username, client_name, personnel_username, datetime, status, address) VALUES
+INSERT INTO [Pizza_Order] (client_username, client_name, personnel_username, datetime, status_id, address) VALUES
 ('jdoe', 'John Doe', 'rdeboer', '2024-06-12 18:45:00', 1, 'Bakkerstraat 1, 6811EG, Arnhem'),
 ('mvermeer', 'Maria Vermeer', 'sbakker', '2024-06-12 19:00:00', 2, 'Jansplein 2, 6811GD, Arnhem'),
 ('fholwerda', 'Fenna Holwerda', 'lheineken', '2024-06-12 19:15:00', 1, 'Willemsplein 3, 6811KD, Arnhem'),
@@ -209,48 +224,47 @@ INSERT INTO [Pizza_Order] (client_username, client_name, personnel_username, dat
 ('jdoe', 'John Doe', 'mvandam', '2024-06-14 19:30:00', 2, 'Van Broeckhuysenstraat 24, 6511PE, Nijmegen'),
 (NULL, 'Henk de Wit', 'gkoolstra', '2024-06-14 19:45:00', 3, 'Ziekerstraat 25, 6511LH, Nijmegen');
 
-
 -- Insert statements for Pizza_Order_Product (dummy data for orders)
-INSERT INTO Pizza_Order_Product (order_id, product_name, quantity) VALUES
-(1, 'Margherita Pizza', 2),
-(1, 'Coca Cola', 3),
-(2, 'Pepperoni Pizza', 1),
-(2, 'Sprite', 2),
-(3, 'Vegetarische Pizza', 1),
-(3, 'Hawaiian Pizza', 1),
-(4, 'Combinatiemaaltijd', 2),
-(4, 'Knoflookbrood', 1),
-(5, 'Pepperoni Pizza', 1),
-(6, 'Margherita Pizza', 3),
-(6, 'Hawaiian Pizza', 2),
-(7, 'Combinatiemaaltijd', 2),
-(8, 'Knoflookbrood', 2),
-(8, 'Sprite', 1),
-(9, 'Pepperoni Pizza', 1),
-(10, 'Hawaiian Pizza', 2),
-(10, 'Coca Cola', 2),
-(11, 'Margherita Pizza', 2),
-(12, 'Vegetarische Pizza', 1),
-(13, 'Hawaiian Pizza', 3),
-(13, 'Coca Cola', 1),
-(14, 'Combinatiemaaltijd', 1),
-(14, 'Knoflookbrood', 1),
-(15, 'Pepperoni Pizza', 2),
-(15, 'Sprite', 2),
-(16, 'Margherita Pizza', 1),
-(17, 'Vegetarische Pizza', 2),
-(18, 'Hawaiian Pizza', 1),
-(19, 'Combinatiemaaltijd', 2),
-(19, 'Knoflookbrood', 1),
-(20, 'Pepperoni Pizza', 3),
-(21, 'Hawaiian Pizza', 2),
-(21, 'Coca Cola', 1),
-(22, 'Margherita Pizza', 2),
-(22, 'Knoflookbrood', 1),
-(23, 'Pepperoni Pizza', 1),
-(24, 'Vegetarische Pizza', 2),
-(25, 'Hawaiian Pizza', 2),
-(25, 'Sprite', 1);
+INSERT INTO Pizza_Order_Product (order_id, product_id, quantity) VALUES
+(1, 1, 2),
+(1, 7, 3),
+(2, 2, 1),
+(2, 8, 2),
+(3, 3, 1),
+(3, 4, 1),
+(4, 5, 2),
+(4, 6, 1),
+(5, 2, 1),
+(6, 1, 3),
+(6, 4, 2),
+(7, 5, 2),
+(8, 6, 2),
+(8, 8, 1),
+(9, 2, 1),
+(10, 4, 2),
+(10, 7, 2),
+(11, 1, 2),
+(12, 3, 1),
+(13, 4, 3),
+(13, 7, 1),
+(14, 5, 1),
+(14, 6, 1),
+(15, 2, 2),
+(15, 8, 2),
+(16, 1, 1),
+(17, 3, 2),
+(18, 4, 1),
+(19, 5, 2),
+(19, 6, 1),
+(20, 2, 3),
+(21, 4, 2),
+(21, 7, 1),
+(22, 1, 2),
+(22, 6, 1),
+(23, 2, 1),
+(24, 3, 2),
+(25, 4, 2),
+(25, 8, 1);
 
 
 -- pak de oudste en de nieuwste datum
