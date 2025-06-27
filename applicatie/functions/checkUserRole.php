@@ -1,7 +1,6 @@
 <?php 
 function checkIsEmployee() {
 
-    
     if (!isset($_SESSION['username'])) {
         return false;
     }
@@ -17,5 +16,6 @@ function checkIsEmployee() {
         return true;
     }else{
     return false;
-}}
+    }
+}
 ?>

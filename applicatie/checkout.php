@@ -10,7 +10,6 @@ $username = $_SESSION['username'] ?? null;
 $client_name = '';
 $address = '';
 
-// Haal naam en adres op voor ingelogde gebruiker
 if ($username) {
     $sql = "SELECT first_name, address FROM [User] WHERE username = :username";
     $stmt = $db->prepare($sql);
@@ -21,9 +20,7 @@ if ($username) {
     }
 }
 
-// Verwerk formulier
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Alleen overschrijven als gebruiker niet is ingelogd
     if (!$username) {
         $client_name = trim($_POST['client_name'] ?? '');
     }
@@ -33,7 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $client_username = $username;
 
-    // Validatie
     if (!$client_username && empty($client_name)) {
         $errors[] = 'Naam is verplicht voor niet-ingelogde gebruikers.';
     }
@@ -55,18 +51,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Controleer of winkelwagen bestaat en niet leeg is
     if (empty($_SESSION['cart']) || !is_array($_SESSION['cart']) || count($_SESSION['cart']) === 0) {
         $errors[] = 'Je winkelwagen is leeg.';
     }
 
-    // Als geen fouten, bestelling plaatsen
     if (empty($errors)) {
         try {
-            // Start transaction
             $db->beginTransaction();
 
-            // Insert in Pizza_Order
             $sql = "INSERT INTO Pizza_Order (client_username, client_name, personnel_username, datetime, status_id, address)
                     VALUES (:client_username, :client_name, NULL, :datetime, 1, :address)";
             $stmt = $db->prepare($sql);
@@ -77,10 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':address' => $address
             ]);
 
-            // Haal laatst toegevoegde order_id op
             $order_id = $db->lastInsertId();
 
-            // Insert producten uit winkelwagen in Pizza_Order_Product
             $insertProductSql = "INSERT INTO Pizza_Order_Product (order_id, product_id, quantity) VALUES (:order_id, :product_id, :quantity)";
             $insertProductStmt = $db->prepare($insertProductSql);
 
@@ -92,10 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
 
-            // Commit transaction
             $db->commit();
 
-            // Leeg de winkelwagen
             unset($_SESSION['cart']);
 
             $success = true;

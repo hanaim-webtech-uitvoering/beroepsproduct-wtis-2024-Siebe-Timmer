@@ -7,7 +7,6 @@ $producten = [];
 $foutmelding = '';
 $totaalPrijs = 0.0;
 
-// Verwerk formulier indien verzonden
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orderId = (int) $_POST['order_id'];
     $clientName = trim($_POST['client_name']);
@@ -50,11 +49,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$content = '';
+
+if ($foutmelding !== '') {
+    $content .= '<p style="color:red;">' . htmlspecialchars($foutmelding) . '</p>';
+} elseif ($orderInfo !== null) {
+    $content .= '<h2>Bestelling #' . htmlspecialchars($orderInfo['order_id']) . '</h2>';
+    $content .= '<p><strong>Klant:</strong> ' . htmlspecialchars($orderInfo['client_name']) . '</p>';
+    $content .= '<p><strong>Bezorgadres:</strong> ' . htmlspecialchars($orderInfo['address']) . '</p>';
+    $content .= '<p><strong>Datum/tijd:</strong> ' . htmlspecialchars($orderInfo['datetime']) . '</p>';
+    $content .= '<p><strong>Status:</strong> ' . htmlspecialchars($orderInfo['status_name'] ?? 'Onbekend') . '</p>';
+
+    $content .= '<h3>Bestelde producten:</h3>';
+    $content .= '<table border="1" cellpadding="5" cellspacing="0">';
+    $content .= '<tr><th>Product</th><th>Aantal</th><th>Prijs per stuk</th><th>Subtotaal</th></tr>';
+
+    foreach ($producten as $item) {
+        $content .= '<tr>';
+        $content .= '<td>' . htmlspecialchars($item['name']) . '</td>';
+        $content .= '<td>' . $item['quantity'] . '</td>';
+        $content .= '<td>€ ' . number_format($item['price'], 2, ',', '.') . '</td>';
+        $content .= '<td>€ ' . number_format($item['subtotal'], 2, ',', '.') . '</td>';
+        $content .= '</tr>';
+    }
+
+    $content .= '<tr>';
+    $content .= '<td colspan="3"><strong>Totaal</strong></td>';
+    $content .= '<td><strong>€ ' . number_format($totaalPrijs, 2, ',', '.') . '</strong></td>';
+    $content .= '</tr>';
+
+    $content .= '</table>';
+}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
+    <meta charset="UTF-8">
     <title>Bestelstatus</title>
 </head>
 <body>
@@ -70,31 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Bekijk bestelling</button>
     </form>
 
-    <?php if ($foutmelding): ?>
-        <p style="color:red;"><?= htmlspecialchars($foutmelding) ?></p>
-    <?php elseif ($orderInfo): ?>
-        <h2>Bestelling #<?= htmlspecialchars($orderInfo['order_id']) ?></h2>
-        <p><strong>Klant:</strong> <?= htmlspecialchars($orderInfo['client_name']) ?></p>
-        <p><strong>Bezorgadres:</strong> <?= htmlspecialchars($orderInfo['address']) ?></p>
-        <p><strong>Datum/tijd:</strong> <?= htmlspecialchars($orderInfo['datetime']) ?></p>
-        <p><strong>Status:</strong> <?= htmlspecialchars($orderInfo['status_name'] ?? 'Onbekend') ?></p>
-
-        <h3>Bestelde producten:</h3>
-        <table border="1" cellpadding="5" cellspacing="0">
-            <tr><th>Product</th><th>Aantal</th><th>Prijs per stuk</th><th>Subtotaal</th></tr>
-            <?php foreach ($producten as $item): ?>
-                <tr>
-                    <td><?= htmlspecialchars($item['name']) ?></td>
-                    <td><?= $item['quantity'] ?></td>
-                    <td>€ <?= number_format($item['price'], 2, ',', '.') ?></td>
-                    <td>€ <?= number_format($item['subtotal'], 2, ',', '.') ?></td>
-                </tr>
-            <?php endforeach; ?>
-            <tr>
-                <td colspan="3"><strong>Totaal</strong></td>
-                <td><strong>€ <?= number_format($totaalPrijs, 2, ',', '.') ?></strong></td>
-            </tr>
-        </table>
-    <?php endif; ?>
+    <?= $content ?>
 </body>
 </html>

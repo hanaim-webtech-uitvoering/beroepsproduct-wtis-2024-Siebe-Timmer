@@ -25,13 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
                 case 'removeOne':
-    if (isset($_SESSION['cart'][$productId])) {
-        $_SESSION['cart'][$productId]--;
-        if ($_SESSION['cart'][$productId] <= 0) {
-            unset($_SESSION['cart'][$productId]);
+                    if (isset($_SESSION['cart'][$productId])) {
+                    $_SESSION['cart'][$productId]--;
+                    if ($_SESSION['cart'][$productId] <= 0) {
+                        unset($_SESSION['cart'][$productId]);
+                    }
         }
-    }
-    break;
+            break;
 
             case 'remove':
                 unset($_SESSION['cart'][$productId]);
