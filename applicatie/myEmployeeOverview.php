@@ -1,10 +1,11 @@
 <?php
 session_start();
 require_once './db_connectie.php';
+require_once './functions/checkUserRole.php';
 
-if (!isset($_SESSION['username'])) {
-    die("Alleen ingelogd personeel heeft toegang.");
-}
+if(!checkIsEmployee()){
+    header('Location: index.php');
+};
 
 $db = maakVerbinding();
 $personnelUsername = $_SESSION['username'];
@@ -59,7 +60,7 @@ $bestellingenHtml = renderBestellingen($orders);
 </head>
 <body>
     <h1>Mijn bestellingen (<?= htmlspecialchars($personnelUsername) ?>)</h1>
-    <p><a href="employeeOverview.php">← Terug naar overzicht</a></p>
+    <p><a href="employeeOverview.php">Terug naar overzicht</a></p>
     <?= $bestellingenHtml ?>
 </body>
 </html>

@@ -14,6 +14,7 @@ if(checkIsEmployee()){
 }
 } else{
     return "<li><a href='login.php'>Inloggen</a></li>
+    <li><a href='cart.php'>Winkelwagen</a></li>
     <li><a href='orderStatus.php'>Status bestelling</a></li>";
 }
 

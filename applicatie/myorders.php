@@ -60,7 +60,7 @@ $bestellingenHtml = renderBestellingen($orders);
 </head>
 <body>
     <h1>Mijn bestellingen, <?= htmlspecialchars($clientUsername) ?></h1>
-    <p><a href="index.php">← Terug naar home</a></p>
+    <p><a href="index.php">Terug naar home</a></p>
     <?= $bestellingenHtml ?>
 </body>
 </html>

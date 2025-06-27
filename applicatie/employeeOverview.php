@@ -12,7 +12,6 @@ $db = maakVerbinding();
 $personnelUsername = $_SESSION['username'];
 $errors = [];
 
-// Verwerk 'accepteren'-actie
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accepteer_order_id'])) {
     $orderId = $_POST['accepteer_order_id'];
 
